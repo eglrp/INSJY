@@ -93,10 +93,10 @@ void UTCTime2GPSTime()
 void mti_txt_input_data(FILE * fp, INSData * out)
 {
 	char temp[300];
-	fscanf(fp, "%s", temp);
-	double p1, p2,nano;
+	fgets(temp, 300, fp);
+	int p1, p2,nano;
 	int valid;
-	sscanf(temp, "%d%d%lf%d%d%d%d%d%d%d%lf%lf%lf%lf%lf%lf",
+	sscanf(temp, "%d%d%d%d%d%d%d%d%lf%d%lf%lf%lf%lf%lf%lf\n",
 		&p1,&p2,
 		&nano,
 		&time.year,
@@ -108,7 +108,7 @@ void mti_txt_input_data(FILE * fp, INSData * out)
 		&valid,
 		out->A, out->A + 1, out->A + 2,
 		out->G, out->G + 1, out->G + 2);
-	time.sec += nano / 1e9;
+	time.sec += nano * 1.0 / 1e9;
 	UTCTime2GPSTime();
 	out->Time = time.SecInWeek;
 }

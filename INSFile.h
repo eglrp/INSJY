@@ -1,4 +1,6 @@
 #pragma once
+#pragma warning(disable : 4996)
+
 #include <stdio.h>
 #include "Enums.h"
 #include "Structs.h"
@@ -6,36 +8,42 @@
 #include "CPTTxt.h"
 #include "MTITxt.h"
 #include "SBGTxt.h"
+#define read_single_line fgets(temp,210,insFile->fp)
 class INSFile {
 public:
 	bool available() {
-		return fp != NULL;
+		if (fp == NULL)return false;
+		else {
+			return !feof(fp);
+		}
 	}
 	void close() {
 		fclose(fp);
+		fp = NULL;
 	}
 	static INSFile * open(const char * file, FileFormat format) {
 		INSFile * insFile = new INSFile();
+		char temp[210];
 		switch (format)
 		{
 		case CPTbin:			
 			insFile->fp = fopen(file, "rb");
 			break;
 		case MTIbin:
-			char temp[200];
+			
 			insFile->fp = fopen(file, "rb");
-			for (int i = 0;i < 5;i++)fscanf(insFile->fp, "%s", temp);
+			
 			break;
 		case CPTtxt:
 			insFile->fp = fopen(file, "r");
 			break;
 		case MTItxt:
 			insFile->fp = fopen(file, "r");
+			for (int i = 0;i < 5;i++)read_single_line;
 			break;
 		case SBGtxt:
-			char temp[200];
 			insFile->fp = fopen(file, "r");
-			for (int i = 0;i < 2;i++)fscanf(insFile->fp, "%s", temp);
+			for (int i = 0;i < 2;i++)read_single_line;
 			break;
 		}
 		if (insFile->fp == NULL)throw "fatal error 000";

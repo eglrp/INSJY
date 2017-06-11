@@ -94,17 +94,16 @@ void cpt_bin_input_data(FILE * fp, INSData * out)
 	fread(crc, crc_size, 1, fp);
 	if (message_id == id_imu)
 	{
-		int length_2 = get_uchar((uchar*)data + 3);
 		RAWIMUSMessage * casted_data = (RAWIMUSMessage*)data;
 		if (casted_data->body.imu_status == status_fine)
 		{
 			out->Time = casted_data->body.sec;
-			out->A[0] = casted_data->body.AX * ASF;
-			out->A[1] = -casted_data->body.AY * ASF;
-			out->A[2] = casted_data->body.AZ * ASF;
-			out->G[0] = casted_data->body.GX * GSF;
-			out->G[1] = -casted_data->body.GY * GSF;
-			out->G[2] = casted_data->body.GZ * GSF;
+			out->A[0] = casted_data->body.AX * ASF / 0.01;
+			out->A[1] = -casted_data->body.AY * ASF / 0.01;
+			out->A[2] = casted_data->body.AZ * ASF / 0.01;
+			out->G[0] = casted_data->body.GX * GSF / 0.01;
+			out->G[1] = -casted_data->body.GY * GSF / 0.01;
+			out->G[2] = casted_data->body.GZ * GSF / 0.01;
 		}
 	}
 	ulong crc_file = get_ulong(crc);
