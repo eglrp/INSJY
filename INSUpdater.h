@@ -4,6 +4,10 @@
 #include "DetailedFunctions.h"
 #include "MatCpp.h"
 using namespace CppToolBox;
+double init_motion[]{ 30.53103519 * PI / 180.0,114.35684659 * PI / 180.0,42.216 };
+double init_velocity[]{ 0,0,0 };
+double init_position[]{ 0,0,0 };
+
 class INSUpdater {
 public:
 	INSUpdater(INSFile * ifile, ResultFile * ofile)
@@ -11,8 +15,27 @@ public:
 		insFile = ifile;
 		resultFile = ofile;
 		is_first = true;
+
+		motion_previous = Vector(init_motion, 3);
+		motion_present = Vector(3);
+		velocity_previous = Vector(init_velocity, 3);
+		velocity_present = Vector(3);
+		position_previous = Vector(init_position, 3);
+		position_present = Vector(3);
+
+		result = new INSResult();
+
 		grab_one_data();
 		reset();
+	}
+	bool available()
+	{
+		return insFile->available();
+	}
+	void dispose()
+	{
+		insFile->close();
+		resultFile->close();
 	}
 	void update()
 	{
@@ -21,6 +44,8 @@ public:
 		velocity_update();
 		position_update();
 		reset();
+
+		resultFile->append(result);
 	}
 private:
 	void grab_one_data()
@@ -37,6 +62,7 @@ private:
 
 	//全局生命量
 	bool is_first;
+	INSResult * result;
 
 	//历元间暂存量
 	Vector motion_previous;
@@ -149,8 +175,15 @@ private:
 		position_present[1] = L0;
 		position_present[2] = H0;
 	}
+
 	void reset()
 	{
+		//封装result
+		memcpy(result->Motion, motion_present.get_array(), sizeof(double) * 3);
+		memcpy(result->Velocity, velocity_present.get_array(), sizeof(double) * 3);
+		memcpy(result->Position, position_present.get_array(), sizeof(double) * 3);
+		result->Time = obstime_present;
+
 		obstime_previous = obstime_present;
 		motion_previous = motion_present;
 		velocity_previous = velocity_present;
